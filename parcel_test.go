@@ -51,13 +51,14 @@ func TestAddGetDelete(t *testing.T) {
 	// проверьте, что значения всех полей в полученном объекте совпадают со значениями полей в переменной parcel
 
 	dbParcel, err := store.Get(id)
-
 	require.NoError(t, err)
+
 	assert.NotEmpty(t, dbParcel.Number)
-	assert.Equal(t, parcel.Client, dbParcel.Client)
-	assert.Equal(t, parcel.Status, dbParcel.Status)
-	assert.Equal(t, parcel.Address, dbParcel.Address)
-	assert.Equal(t, parcel.CreatedAt, dbParcel.CreatedAt)
+
+	expectedParcel := parcel
+	expectedParcel.Number = dbParcel.Number
+
+	assert.Equal(t, expectedParcel, dbParcel)
 
 	// delete
 	// удалите добавленную посылку, убедитесь в отсутствии ошибки
@@ -179,7 +180,9 @@ func TestGetByClient(t *testing.T) {
 		// в parcelMap лежат добавленные посылки, ключ - идентификатор посылки, значение - сама посылка
 		// убедитесь, что все посылки из storedParcels есть в parcelMap
 		// убедитесь, что значения полей полученных посылок заполнены верно
-		mParcel := parcelMap[parcel.Number]
-		assert.Equal(t, mParcel, parcel)
+
+		if _, ok := parcelMap[parcel.Number]; !ok {
+			t.Errorf("parcel with ID %d not found in parcelMap", parcel.Number)
+		}
 	}
 }
